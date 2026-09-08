@@ -1,0 +1,7 @@
+ECHO: overall_width_mm = 103.6, usable_bay_mm = [100.6, 100.6], slot_pitch_mm = 25.4, slot_centres_from_left_mm = [26.4, 51.8, 77.2]
+Geometries in cache: 75
+Geometry cache size in bytes: 118640
+CGAL Polyhedrons in cache: 31
+CGAL cache size in bytes: 4660256
+Total rendering time: 0:00:02.594
+Current top level object is empty.

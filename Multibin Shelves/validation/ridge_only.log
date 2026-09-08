@@ -1,0 +1,14 @@
+ECHO: overall_width_mm = 103.6, usable_bay_mm = [100.6, 100.6], slot_pitch_mm = 25.4, slot_centres_from_left_mm = [26.4, 51.8, 77.2]
+Geometries in cache: 21
+Geometry cache size in bytes: 40432
+CGAL Polyhedrons in cache: 17
+CGAL cache size in bytes: 4766944
+Total rendering time: 0:00:02.626
+   Top level object is a 3D object:
+   Simple:        yes
+   Vertices:      523
+   Halfedges:    1570
+   Edges:         785
+   Halffacets:    522
+   Facets:        261
+   Volumes:         2

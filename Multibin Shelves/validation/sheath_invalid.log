@@ -1,0 +1,8 @@
+ERROR: Assertion '((outerTip - inner) >= 0.4)' failed: "Less than 0.4 mm remains at the strip tip; reduce clearances or shim depth." in file Pegboard_Rail_Sheath.scad, line 26
+TRACE: called by 'assert' in file Pegboard_Rail_Sheath.scad, line 26
+Geometries in cache: 1
+Geometry cache size in bytes: 0
+CGAL Polyhedrons in cache: 0
+CGAL cache size in bytes: 0
+Total rendering time: 0:00:00.000
+Current top level object is empty.

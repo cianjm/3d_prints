@@ -1,0 +1,8 @@
+ECHO: overall_width_mm = 103.6, usable_bay_mm = [100.6, 100.6], slot_pitch_mm = 25.4, slot_centres_from_left_mm = [26.4, 51.8, 77.2]
+ECHO: back_height_mm = 48, pegboard_rail_lock = true, rail_bottom_clearance_mm = 2
+Geometries in cache: 53
+Geometry cache size in bytes: 2470504
+CGAL Polyhedrons in cache: 37
+CGAL cache size in bytes: 73949232
+Total rendering time: 0:00:23.995
+Current top level object is empty.

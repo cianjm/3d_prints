@@ -1,0 +1,12 @@
+{
+    "parameterSets": {
+        "2.5mm": {
+            "extra_hook_reach": "2.5",
+            "hook_end_y": "4.89876",
+            "hook_width": "16.8",
+            "notch_z": "2.25",
+            "reinforcement": "true"
+        }
+    },
+    "fileFormatVersion": "1"
+}

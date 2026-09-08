@@ -1,0 +1,8 @@
+ERROR: Assertion '(!railMountMode || (((railRecessDepth >= 0) && (railRecessDepth <= 0.9)) && (((2.35 - slotDepthMicroadjustment) - railRecessDepth) >= 1.4)))' failed: "Keep rail recess between 0 and 0.9 mm and at least 1.4 mm behind the slot." in file MultiConnect_Multibin.scad, line 152
+TRACE: called by 'assert' in file MultiConnect_Multibin.scad, line 152
+Geometries in cache: 1
+Geometry cache size in bytes: 0
+CGAL Polyhedrons in cache: 0
+CGAL cache size in bytes: 0
+Total rendering time: 0:00:00.000
+Current top level object is empty.

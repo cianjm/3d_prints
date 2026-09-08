@@ -1,0 +1,8 @@
+ERROR: Assertion '((multibinUnitSize > 0) && (shellClearance >= 0))' failed: "Unit size must be positive and clearance nonnegative." in file MultiConnect_Multibin.scad, line 119
+TRACE: called by 'assert' in file MultiConnect_Multibin.scad, line 119
+Geometries in cache: 1
+Geometry cache size in bytes: 0
+CGAL Polyhedrons in cache: 0
+CGAL cache size in bytes: 0
+Total rendering time: 0:00:00.000
+Current top level object is empty.

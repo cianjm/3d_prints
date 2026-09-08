@@ -1,0 +1,8 @@
+ERROR: Assertion '(((grooveRoofClearance >= 0.3) && (ridgeHeight > measuredTaperStart)) && (ridgeHeight <= (measuredGrooveDepth - 0.3)))' failed: "Roof clearance must be at least 0.3 mm and leave ridge engagement above 3.6 mm; crossings are shallower than the main groove." in file fit_check.scad, line 131
+TRACE: called by 'assert' in file fit_check.scad, line 131
+Geometries in cache: 1
+Geometry cache size in bytes: 0
+CGAL Polyhedrons in cache: 0
+CGAL cache size in bytes: 0
+Total rendering time: 0:00:00.000
+Current top level object is empty.

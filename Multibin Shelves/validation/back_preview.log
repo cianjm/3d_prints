@@ -1,0 +1,8 @@
+ECHO: overall_width_mm = 103.6, usable_bay_mm = [100.6, 100.6], slot_pitch_mm = 25.4, slot_centres_from_left_mm = [26.4, 51.8, 77.2]
+Compiling design (CSG Products normalization)...
+Normalized CSG tree has 464 elements
+Geometries in cache: 25
+Geometry cache size in bytes: 24944
+CGAL Polyhedrons in cache: 0
+CGAL cache size in bytes: 0
+Total rendering time: 0:00:00.211
