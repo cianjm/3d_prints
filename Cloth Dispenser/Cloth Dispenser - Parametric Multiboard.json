@@ -1,0 +1,41 @@
+{
+    "parameterSets": {
+        "4x4x5": {
+            "bottom_relief_radius": "10",
+            "bottom_thickness": "2",
+            "curve_fn": "72",
+            "depth_units": "4",
+            "eps": "0.02",
+            "front_edge_radius": "3",
+            "grid_unit": "25",
+            "height_units": "5",
+            "horizontal_slot_top": "5",
+            "lid_groove_depth": "0.8",
+            "lid_handle_depth": "5",
+            "lid_handle_fillet_radius": "2",
+            "lid_handle_overlap": "0",
+            "lid_rear_clearance": "0.3",
+            "lid_rear_stop": "1.5",
+            "lid_side_clearance": "0.25",
+            "lid_top_retainer": "1.6",
+            "lid_top_thickness": "2",
+            "lid_vertical_clearance": "0.4",
+            "mc_inner_lip_depth": "1.2121",
+            "mc_mouth_depth": "0.4379",
+            "mc_mouth_half_width": "7.65",
+            "mc_ramp_depth": "2.5",
+            "mc_receiver_depth": "4.15",
+            "mc_receiver_width": "20.3",
+            "mount_backing": "2",
+            "mount_bottom": "0",
+            "mount_enabled": "true",
+            "mount_top_margin": "10",
+            "opening_radius": "20",
+            "part_to_render": "print_layout",
+            "wall_thickness": "2",
+            "width_units": "4"
+        }
+    },
+    "parameterSets": "",
+    "fileFormatVersion": "1"
+}
