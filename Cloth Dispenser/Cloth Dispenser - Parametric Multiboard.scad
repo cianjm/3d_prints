@@ -55,17 +55,20 @@ lid_handle_depth = 5;        // [5:1:15]
 // Radius (mm) of the fillets on the pull tab.
 lid_handle_fillet_radius = 2; // [0:0.5:4]
 
+// Height (mm) of the ramped retention bump under the lid; set to 0 to disable it.
+lid_detent_height = 0.4; // [0:0.05:0.6]
+
 /* [Lid Tolerances] */
 // Clearance (mm) on each left/right edge of the lid. Higher value will make lid looser, lower will make it tigher. Scales only lid itself, not the grooves on the body.
-lid_side_clearance = 0.25; // [0.1:0.05:0.5]
+lid_side_clearance = 0.2; // [0.1:0.05:0.5]
 
 
 // Clearance (mm) above/below the lid in the grooves. Higher value will make the lid looser, lower will make it tigher. Scales only the grooves on the main body, not the thickness of the lid.
-lid_vertical_clearance = 0.4; // [0.2:0.1:0.8]
+lid_vertical_clearance = 0.3; // [0.2:0.1:0.8]
 
 
 // Clearance (mm) between the rear of the lid and the wall of the groove it slides into. If the lid is not sliding all the way back, try increasing this value. If the lid seems loose at the back, try decrease it. Scales only lid, not the main body, so can re-print just the lid to get the right fit.
-lid_rear_clearance = 0.3;    // [0.1:0.1:0.6]
+lid_rear_clearance = 0.2;    // [0.1:0.1:0.6]
 
 /* [Quality] */
 // Decrease for faster renders, increase for smoother curves on model.
@@ -118,6 +121,12 @@ lid_handle_width = min(lid_handle_target_width, lid_handle_fillet_width);
 // Extend the stopper to the rounded corner's tangent plane so its rear face
 // still reaches the straight side rails. The body cutaway uses the same value.
 lid_fascia_depth = max(front_wall, lid_front_radius);
+lid_flush_top_height = lid_top_retainer + lid_vertical_clearance / 2;
+lid_total_height = lid_top_thickness + lid_flush_top_height;
+// Centre the retention ridge across 80% of the lid's full outside width.
+lid_detent_length = 0.8 * outer_width;
+lid_detent_ramp_depth = 1.6;
+lid_detent_center_y = lid_fascia_depth + 1;
 
 assert(width_units >= 2 && width_units == floor(width_units),
        "width_units must be a whole number of at least 2.");
@@ -161,6 +170,9 @@ assert(lid_handle_fillet_radius >= 0
        && lid_handle_fillet_radius <= lid_handle_depth / 2
        && lid_handle_fillet_radius <= (lid_width - lid_handle_width) / 2,
        "The pull-tab fillet is too large for its depth or side shoulders.");
+assert(lid_detent_height >= 0
+       && lid_detent_height <= min(0.6, lid_top_thickness / 2),
+       "lid_detent_height must be between 0 and half the lid thickness.");
 
 // Rectangle with rounded front corners and square rear corners. Extruding this
 // profile creates fillets only on the two front vertical body edges.
@@ -553,6 +565,10 @@ module lid_flush_top_2d() {
         // corners vertically aligned and flush with the body walls.
         lid_front_stopper_2d();
 
+        // Keep the pull tab at the same top level. Besides making it stronger,
+        // this gives the inverted printable lid a continuous flat bed face.
+        pull_tab_2d();
+
         // Central flush panel with clearance from both rails and the rear lip.
         intersection() {
             lid_plate_2d();
@@ -635,26 +651,57 @@ module chamfered_lid_base() {
     }
 }
 
+// Shallow two-way ramp under the lid. In use it flexes over the top of the
+// front wall, then rests over the open interior and resists accidental removal.
+// Its small interference is controlled by lid_detent_height relative to half
+// of lid_vertical_clearance.
+module lid_retention_detent() {
+    if (lid_detent_height > 0) {
+        detent_x_min = body_center_x - lid_detent_length / 2;
+
+        hull() {
+            translate([
+                detent_x_min,
+                lid_detent_center_y - lid_detent_ramp_depth / 2,
+                -eps
+            ])
+                cube([
+                    lid_detent_length,
+                    lid_detent_ramp_depth,
+                    eps
+                ]);
+
+            translate([
+                detent_x_min,
+                lid_detent_center_y - eps / 2,
+                -lid_detent_height
+            ])
+                cube([lid_detent_length, eps, eps]);
+        }
+    }
+}
+
 // Captured sliding lid. Its thin base plate runs in the body grooves; the
 // raised central panel fills the space above it and finishes flush with the
 // body's top face in the assembly preview.
 module sliding_lid() {
-    // The lid is centred within its vertical groove clearance in the assembly
-    // preview, so half that clearance is added to reach the exact body top.
-    flush_top_height = lid_top_retainer + lid_vertical_clearance / 2;
-
     union() {
         chamfered_lid_base();
+        lid_retention_detent();
 
         translate([0, 0, lid_top_thickness - eps])
-            linear_extrude(height = flush_top_height + eps)
+            linear_extrude(height = lid_flush_top_height + eps)
                 lid_flush_top_2d();
     }
 }
 
+// Print the lid top-face-down. Its broad raised panel and pull tab sit on the
+// bed, the three chamfered sliding edges grow at 45 degrees, and the underside
+// retention bump builds upward without support.
 module printable_lid() {
-    translate([0, lid_handle_depth, 0])
-        sliding_lid();
+    translate([outer_width, lid_handle_depth, lid_total_height])
+        rotate([0, 180, 0])
+            sliding_lid();
 }
 
 if (part_to_render == "body") {
