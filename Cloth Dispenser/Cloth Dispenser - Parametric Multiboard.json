@@ -13,13 +13,12 @@
             "lid_groove_depth": "0.8",
             "lid_handle_depth": "5",
             "lid_handle_fillet_radius": "2",
-            "lid_handle_overlap": "0",
-            "lid_rear_clearance": "0.3",
-            "lid_rear_stop": "1.5",
-            "lid_side_clearance": "0.25",
+            "lid_detent_height": "0.5",
+            "lid_groove_height": "2.3",
+            "lid_rear_clearance": "0.2",
+            "lid_side_clearance": "0.15",
             "lid_top_retainer": "1.6",
-            "lid_top_thickness": "2",
-            "lid_vertical_clearance": "0.4",
+            "lid_vertical_clearance": "0.1",
             "mc_inner_lip_depth": "1.2121",
             "mc_mouth_depth": "0.4379",
             "mc_mouth_half_width": "7.65",
@@ -29,6 +28,7 @@
             "mount_backing": "2",
             "mount_bottom": "0",
             "mount_enabled": "true",
+            "mount_slot_side_clearance": "0.05",
             "mount_top_margin": "10",
             "opening_radius": "20",
             "part_to_render": "print_layout",
@@ -36,6 +36,5 @@
             "width_units": "4"
         }
     },
-    "parameterSets": "",
     "fileFormatVersion": "1"
 }

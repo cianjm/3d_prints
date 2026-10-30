@@ -37,11 +37,13 @@ mount_enabled = true;
 mount_top_margin = 10;
 // Material remaining behind the receiver cavity.
 mount_backing = 2;
+// Additional horizontal clearance (mm) on each side of every Multiconnect slot.
+mount_slot_side_clearance = 0.05; // [0:0.05:0.5]
 
 /* [Sliding lid] */
 
-// Thickness (mm) of the main body of the lid.
-lid_top_thickness = 2; // [1.2:0.2:3]
+// Fixed height (mm) of the three grooves in the body. The lid wings are made smaller by `lid_vertical_clearance`, so fit adjustments require re-printing only the lid.
+lid_groove_height = 2.3; // [1.5:0.1:3]
 
 // Depth (mm) of the left, right, and rear lid grooves. Their roofs and the matching lid edges use 45-degree chamfers of this size. Must be smaller than `wall_thickness`.
 lid_groove_depth = 0.8; // [0.6:0.1:1.2]
@@ -56,18 +58,18 @@ lid_handle_depth = 5;        // [5:1:15]
 lid_handle_fillet_radius = 2; // [0:0.5:4]
 
 // Height (mm) of the ramped retention bump under the lid; set to 0 to disable it.
-lid_detent_height = 0.4; // [0:0.05:0.6]
+lid_detent_height = 0.5; // [0:0.05:0.6]
 
 /* [Lid Tolerances] */
-// Clearance (mm) on each left/right edge of the lid. Higher value will make lid looser, lower will make it tigher. Scales only lid itself, not the grooves on the body.
-lid_side_clearance = 0.2; // [0.1:0.05:0.5]
+// Clearance (mm) on each left/right lid wing. Higher values make the lid looser; lower values make it tighter. Changes only the lid, not the body grooves.
+lid_side_clearance = 0.15; // [0.05:0.05:0.5]
 
 
-// Clearance (mm) above/below the lid in the grooves. Higher value will make the lid looser, lower will make it tigher. Scales only the grooves on the main body, not the thickness of the lid.
-lid_vertical_clearance = 0.3; // [0.2:0.1:0.8]
+// Total vertical clearance (mm) in the fixed-height grooves. This is subtracted from the lid wing thickness and never changes the body.
+lid_vertical_clearance = 0.1; // [0.05:0.05:0.5]
 
 
-// Clearance (mm) between the rear of the lid and the wall of the groove it slides into. If the lid is not sliding all the way back, try increasing this value. If the lid seems loose at the back, try decrease it. Scales only lid, not the main body, so can re-print just the lid to get the right fit.
+// Clearance (mm) behind the lid. Higher values shorten only the lid; lower values tighten its rear fit. The body groove is unchanged.
 lid_rear_clearance = 0.2;    // [0.1:0.1:0.6]
 
 /* [Quality] */
@@ -89,11 +91,13 @@ mc_mouth_half_width = 7.65; // 15 mm stem + 0.15 mm clearance per side.
 mc_mouth_depth = 0.4379;
 mc_ramp_depth = 2.5;
 mc_inner_lip_depth = 1.2121;
+mc_cut_receiver_width = mc_receiver_width + 2 * mount_slot_side_clearance;
+mc_cut_mouth_width = 2 * (mc_mouth_half_width + mount_slot_side_clearance);
 
 mount_channel_count = width_units;
 mount_channel_spacing = grid_unit;
 mount_channel_array_width = (mount_channel_count - 1) * mount_channel_spacing
-                            + mc_receiver_width;
+                            + mc_cut_receiver_width;
 rear_wall_thickness = mc_receiver_depth + mount_backing;
 mount_bottom = 0;
 mount_top = outer_height - mount_top_margin;
@@ -107,7 +111,7 @@ lid_rail_span = inner_width + 2 * lid_groove_depth;
 lid_width = lid_rail_span - 2 * lid_side_clearance;
 // The rear edge enters a shallow pocket matching the two side-groove depths.
 lid_depth = rear_inner_y + lid_groove_depth - lid_rear_clearance;
-lid_groove_height = lid_top_thickness + lid_vertical_clearance;
+lid_wing_thickness = lid_groove_height - lid_vertical_clearance;
 lid_groove_bottom = outer_height - lid_top_retainer - lid_groove_height;
 lid_groove_top = lid_groove_bottom + lid_groove_height;
 lid_assembled_z = lid_groove_bottom + lid_vertical_clearance / 2;
@@ -120,9 +124,9 @@ lid_handle_fillet_width = lid_width
 lid_handle_width = min(lid_handle_target_width, lid_handle_fillet_width);
 // Extend the stopper to the rounded corner's tangent plane so its rear face
 // still reaches the straight side rails. The body cutaway uses the same value.
-lid_fascia_depth = max(front_wall, lid_front_radius);
+lid_fascia_depth = max(front_wall, front_edge_radius);
 lid_flush_top_height = lid_top_retainer + lid_vertical_clearance / 2;
-lid_total_height = lid_top_thickness + lid_flush_top_height;
+lid_total_height = lid_wing_thickness + lid_flush_top_height;
 // Centre the retention ridge across 80% of the lid's full outside width.
 lid_detent_length = 0.8 * outer_width;
 lid_detent_ramp_depth = 1.6;
@@ -151,11 +155,14 @@ assert(inner_depth > 2 * wall_thickness,
        "The selected depth is too small for the front and reinforced rear walls.");
 assert(mount_channel_array_width + 4 <= outer_width,
        "The receiver array is too wide for the selected width.");
-assert(mount_top > mc_receiver_width / 2,
+assert(mount_top > mc_cut_receiver_width / 2,
        "The selected height is too short for the rounded receiver slots.");
 assert(lid_groove_depth > 0 && lid_groove_depth < wall_thickness,
        "lid_groove_depth must be smaller than wall_thickness.");
-assert(lid_groove_depth <= lid_top_thickness
+assert(lid_vertical_clearance >= 0
+       && lid_vertical_clearance < lid_groove_height,
+       "lid_vertical_clearance must be smaller than lid_groove_height.");
+assert(lid_groove_depth <= lid_wing_thickness
        && lid_groove_depth <= lid_top_retainer,
        "The 45-degree groove chamfer must fit within the lid and top retainer thicknesses.");
 assert(lid_top_retainer > 0 && lid_groove_bottom > horizontal_slot_top,
@@ -171,7 +178,7 @@ assert(lid_handle_fillet_radius >= 0
        && lid_handle_fillet_radius <= (lid_width - lid_handle_width) / 2,
        "The pull-tab fillet is too large for its depth or side shoulders.");
 assert(lid_detent_height >= 0
-       && lid_detent_height <= min(0.6, lid_top_thickness / 2),
+       && lid_detent_height <= min(0.6, lid_wing_thickness / 2),
        "lid_detent_height must be between 0 and half the lid thickness.");
 
 // Rectangle with rounded front corners and square rear corners. Extruding this
@@ -215,7 +222,6 @@ module receiver_slice(center_x, rear_y, width, thickness = eps) {
 
 // Flush Multiconnect V2 receiver with a rounded closed top.
 module multiconnect_receiver_cut(center_x) {
-    mouth_width = 2 * mc_mouth_half_width;
     mouth_inner_y = outer_depth - mc_mouth_depth;
     ramp_inner_y = mouth_inner_y - mc_ramp_depth;
 
@@ -223,17 +229,25 @@ module multiconnect_receiver_cut(center_x) {
         translate([center_x, outer_depth + eps, 0])
             rotate([90, 0, 0])
                 linear_extrude(height = mc_mouth_depth + 2 * eps)
-                    rounded_top_slot_2d(mouth_width);
+                    rounded_top_slot_2d(mc_cut_mouth_width);
 
         hull() {
-            receiver_slice(center_x, mouth_inner_y + eps, mouth_width);
-            receiver_slice(center_x, ramp_inner_y, mc_receiver_width);
+            receiver_slice(
+                center_x,
+                mouth_inner_y + eps,
+                mc_cut_mouth_width
+            );
+            receiver_slice(
+                center_x,
+                ramp_inner_y,
+                mc_cut_receiver_width
+            );
         }
 
         translate([center_x, ramp_inner_y + eps, 0])
             rotate([90, 0, 0])
                 linear_extrude(height = mc_inner_lip_depth + 2 * eps)
-                    rounded_top_slot_2d(mc_receiver_width);
+                    rounded_top_slot_2d(mc_cut_receiver_width);
     }
 }
 
@@ -367,21 +381,18 @@ module groove_roof_chamfer_cuts() {
 // Captured side grooves, an open front entry, and a shallow pocket in the
 // reinforced rear wall. Solid material behind the pocket is the insertion stop.
 module sliding_lid_channels_cut() {
-    // Cut the captured groove from the actual lid outline plus the specified
-    // per-side clearance. This gives rounded lids room inside the curved front
-    // wall without making the visible top cutaway any deeper.
-    translate([0, 0, lid_groove_bottom])
-        linear_extrude(height = lid_groove_height + 2 * eps)
-            intersection() {
-                offset(delta = lid_side_clearance)
-                    lid_plate_2d();
-
-                translate([-eps, -eps])
-                    square([
-                        outer_width + 2 * eps,
-                        rear_inner_y + lid_groove_depth + eps
-                    ]);
-            }
+    // Fixed nominal channel: none of the three lid clearance parameters alter
+    // the body, so fit can be tuned by re-printing only the lid.
+    translate([
+        lid_rail_x_min - eps,
+        -eps,
+        lid_groove_bottom
+    ])
+        cube([
+            lid_rail_span + 2 * eps,
+            rear_inner_y + lid_groove_depth + 2 * eps,
+            lid_groove_height + 2 * eps
+        ]);
 
     // The raised stopper enters this full-height cutaway. Its depth is exactly
     // lid_fascia_depth at every front_edge_radius value.
@@ -595,14 +606,14 @@ module lid_edge_chamfer_cuts() {
         translate([
             lid_x - eps,
             sliding_y_min,
-            lid_top_thickness - chamfer - eps
+            lid_wing_thickness - chamfer - eps
         ])
             cube([eps, sliding_y_span, eps]);
 
         translate([
             lid_x - eps,
             sliding_y_min,
-            lid_top_thickness - eps
+            lid_wing_thickness - eps
         ])
             cube([chamfer + 2 * eps, sliding_y_span, 2 * eps]);
     }
@@ -612,14 +623,14 @@ module lid_edge_chamfer_cuts() {
         translate([
             lid_x + lid_width,
             sliding_y_min,
-            lid_top_thickness - chamfer - eps
+            lid_wing_thickness - chamfer - eps
         ])
             cube([eps, sliding_y_span, eps]);
 
         translate([
             lid_x + lid_width - chamfer - eps,
             sliding_y_min,
-            lid_top_thickness - eps
+            lid_wing_thickness - eps
         ])
             cube([chamfer + 2 * eps, sliding_y_span, 2 * eps]);
     }
@@ -629,14 +640,14 @@ module lid_edge_chamfer_cuts() {
         translate([
             lid_x - eps,
             lid_depth,
-            lid_top_thickness - chamfer - eps
+            lid_wing_thickness - chamfer - eps
         ])
             cube([lid_width + 2 * eps, eps, eps]);
 
         translate([
             lid_x - eps,
             lid_depth - chamfer - eps,
-            lid_top_thickness - eps
+            lid_wing_thickness - eps
         ])
             cube([lid_width + 2 * eps, chamfer + 2 * eps, 2 * eps]);
     }
@@ -644,7 +655,7 @@ module lid_edge_chamfer_cuts() {
 
 module chamfered_lid_base() {
     difference() {
-        linear_extrude(height = lid_top_thickness)
+        linear_extrude(height = lid_wing_thickness)
             lid_plan_2d();
 
         lid_edge_chamfer_cuts();
@@ -668,7 +679,7 @@ module lid_retention_detent() {
                 cube([
                     lid_detent_length,
                     lid_detent_ramp_depth,
-                    eps
+                    2 * eps
                 ]);
 
             translate([
@@ -689,7 +700,7 @@ module sliding_lid() {
         chamfered_lid_base();
         lid_retention_detent();
 
-        translate([0, 0, lid_top_thickness - eps])
+        translate([0, 0, lid_wing_thickness - eps])
             linear_extrude(height = lid_flush_top_height + eps)
                 lid_flush_top_2d();
     }
