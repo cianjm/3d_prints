@@ -56,13 +56,13 @@ from mathutils.kdtree import KDTree
 # PARAMETERS (mm / degrees)
 # =====================================================================================
 # ---- overall ----
-OVERALL_WIDTH     = 151.0   # outer width across the side panels at brow level (head clearance)
-LENS_HEIGHT       = 50.0    # brow top to the lowest point of the lens bottom edge
+OVERALL_WIDTH     = 166.0   # outer width across the side panels at brow level (product: 166 mm; fits over 142 mm glasses)
+LENS_HEIGHT       = 57.0    # brow top to the lowest point of the lens bottom edge (product frame height 55)
 Z_TOP             = 25.0    # world z of the brow top in the assembly frame
 WALL              = 2.1     # shell wall thickness, measured along the surface normal
 
 # ---- front face, plan view ----
-FRONT_SAG         = 28.0    # at brow level the centre is this far forward of the turn end
+FRONT_SAG         = 30.0    # at brow level the centre is this far forward of the turn end
                             # (28 fits the side + 3/4 photos better than 19; see report)
 FRONT_POWER       = 2.5     # front plan curve y ~ |x|^p (>= 2: convex, flatter in the middle)
 CORNER_R          = 8.0     # outer radius of the front-to-side turn
@@ -76,7 +76,7 @@ BOTTOM_TUCK_END   = 45.0    # deg from vertical the face reaches at the bottom e
                             # the upright print free of overhang there)
 
 # ---- front-view taper ----
-SIDE_TAPER        = 14.0    # side panels pull inward by this much at the lens bottom (per side)
+SIDE_TAPER        = 9.0     # side panels pull inward by this much at the lens bottom (per side)
 SIDE_TAPER_V1     = 0.45    # straight (planar) above this relative depth v: covers the whole arm
                             # band, so the flat arm inlays flush ...
 SIDE_TAPER_K1     = 3.3     # ... with this gentle lean (mm per unit v) for head clearance,
@@ -101,7 +101,7 @@ DECK_RISE_FADE    = (-2.0, -8.0)  # ... fading out between these distances (w) a
                             # narrow front (no notch beside it) and is level beside its rear,
                             # where the cap's inner face stands about 3 mm
 DECK_RISE_EASE    = 0.35    # fraction of the rise eased off toward the corners before that fade
-DECK_DEPTH_SIDE   = 5.55    # along the side (arm channel + joggled wall + lip; >= 139 mm inside)
+DECK_DEPTH_SIDE   = 5.55    # along the side (arm channel + joggled wall + lip; >= 154 mm inside)
 DECK_DEPTH_REAR   = 3.6     # at the rear end (lip tapers out)
 DECK_SIDE_SLOPE   = 6.0     # deg, the deck / panel top slopes down toward the rear from the seam
 DECK_SLOPE_BLEND  = 10.0    # length of the smooth flat-to-slope transition
@@ -110,13 +110,13 @@ TOP_MARGIN        = 1.5     # shell + deck are built this much taller, then trim
 BROW_FACET_H      = 0.0     # optional 45-deg facet between brow face and deck top (0 = off)
 
 # ---- nose notch (front view) ----
-NOTCH_HEIGHT      = 17.0    # rise from the bottom edge to the apex
+NOTCH_HEIGHT      = 19.0    # rise from the bottom edge to the apex
 NOTCH_APEX_R      = 5.5     # apex radius (apex ~11 mm wide)
 NOTCH_SIDE_ANG    = 40.0    # deg from vertical of the straight notch sides
 NOTCH_FLARE_R     = 18.0    # concave flare radius into the bottom edge
 
 # ---- bottom edge ----
-BOTTOM_FLAT_X     = 44.0    # front bottom edge is flat out to |x| = this
+BOTTOM_FLAT_X     = 48.0    # front bottom edge is flat out to |x| = this
 BOTTOM_RISE_TURN0 = 1.0     # rise of the bottom edge where the turn starts
 BOTTOM_RISE_TURN1 = 2.0     # rise at the end of the turn = side panel bottom level at the front
                             # (small, so in the side view the bottom outline runs on in one arc
@@ -167,8 +167,8 @@ PIN_PITCH         = 3.6     # hex grid pitch
 PIN_ZONE_W        = 32.0    # elliptical zone per eye
 PIN_ZONE_H        = 22.0
 EYE_X             = 32.0    # eye centres at +-EYE_X
-EYE_Z             = 3.0     # above the lens vertical middle (z = Z_TOP - LENS_HEIGHT/2)
-EYE_DEPTH         = 30.0    # world y of the wearer's eye: each pinhole is drilled along the
+EYE_Z             = 0.5     # above the lens vertical middle (z = Z_TOP - LENS_HEIGHT/2)
+EYE_DEPTH         = 36.0    # world y of the wearer's eye: each pinhole is drilled along the
                             # line from the eye through it (open along every line of sight)
 PIN_SEGS          = 16
 PIN_EDGE_MARGIN   = 3.0
