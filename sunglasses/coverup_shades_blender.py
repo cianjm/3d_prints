@@ -85,7 +85,7 @@ SIDE_TAPER_V2     = 0.58    # then a smooth shoulder down to v2 and a straight p
 
 # ---- brow deck ----
 DECK_T            = 3.5     # deck thickness (measured under its sloped top)
-DECK_DEPTH_C      = 11.0    # deck depth front-to-back at the centre
+DECK_DEPTH_C      = 12.5    # deck depth front-to-back at the centre
 DECK_DEPTH_TURN   = 10.0    # where the front curve meets the turn (the inner edge rounds the
                             # corner on a Hermite curve, so it is not limited by CORNER_R)
 DECK_CORNER_IN    = 5.0     # inner-edge rounding starts this far (w) before the turn ...
@@ -93,9 +93,14 @@ DECK_CORNER_OUT   = 1.0     # ... and ends this far behind it
 DECK_CORNER_K     = 0.8     # Hermite tangent length / chord (fullness of the rounded corner)
 DECK_DEPTH_SEAM   = 9.3     # just behind the turn, under the rear of the hinge cap (a little
                             # less than HINGE_WID, so the cap covers the deck where the top steps up)
-DECK_RISE         = 1.9     # the deck top rises from the crisp brow edge toward the face:
-                            # its rear edge sits this much higher (about 10 deg at the centre)
-DECK_RISE_FADE    = (14.0, 4.0)   # ... fading out between these distances (w) ahead of the cap
+DECK_RISE         = 3.4     # the deck top rises from the crisp brow edge toward the face:
+                            # its rear edge sits this much higher (about 15 deg at the centre), so
+                            # in the front view the brow's top line is level with the cap tops
+DECK_RISE_FADE    = (-2.0, -8.0)  # ... fading out between these distances (w) ahead of the cap
+                            # front (negative: inside it): the deck runs on raised into the cap's
+                            # narrow front (no notch beside it) and is level beside its rear,
+                            # where the cap's inner face stands about 3 mm
+DECK_RISE_EASE    = 0.35    # fraction of the rise eased off toward the corners before that fade
 DECK_DEPTH_SIDE   = 5.55    # along the side (arm channel + joggled wall + lip; >= 139 mm inside)
 DECK_DEPTH_REAR   = 3.6     # at the rear end (lip tapers out)
 DECK_SIDE_SLOPE   = 6.0     # deg, the deck / panel top slopes down toward the rear from the seam
@@ -139,8 +144,8 @@ HINGE_JOIN_H      = 2.5     # arm top (and panel top) at the joint, above the br
                             # rear runs level into it and the top line then falls away rearward
 HINGE_H_REAR      = HINGE_JOIN_H + 0.05   # cap top at the rear (0.05 proud: no coplanar faces)
 HINGE_H_FRONT     = 1.0     # cap top at the front end, rising (along the cap, fractions from its
-HINGE_H_PEAK      = 4.0     # front) to this peak round the screw hole: a 4 mm inner face over the
-HINGE_PEAK_FROM   = 0.4     # level deck (most of the rise by here, the last HINGE_PEAK_CLIMB of
+HINGE_H_PEAK      = 3.0     # front) to this peak round the screw hole: a 3 mm inner face over the
+HINGE_PEAK_FROM   = 0.18    # deck (a steep sloped front face: most of the rise by here, the last
 HINGE_PEAK_CLIMB  = 0.18    # it climbed gently past the hole up to HINGE_PEAK_TO) ...
 HINGE_PEAK_TO     = 0.75    # ... then rounding down to HINGE_H_REAR at the rear face, with zero
                             # slope there, so it runs tangentially into the arm's top edge
@@ -1149,8 +1154,11 @@ def deck_rise(aw):
     fading to 0 ahead of the hinge cap, so the cap's inner face stands its full height over a
     level deck (and the side lips are level across)."""
     w0, w1 = cap_range()
-    return DECK_RISE * (1.0 - smoothstep(w0 - DECK_RISE_FADE[0], w0 - DECK_RISE_FADE[1],
-                                         np.asarray(aw, float)))
+    aw = np.asarray(aw, float)
+    # the rear edge sits further back toward the corners (so it reads higher from the front):
+    # ease the rise off there, leaving the shallow dip beside the caps seen in the front photo
+    ease = 1.0 - DECK_RISE_EASE * smoothstep(30.0, w0 - DECK_RISE_FADE[0], aw)
+    return DECK_RISE * ease * (1.0 - smoothstep(w0 - DECK_RISE_FADE[0], w0 - DECK_RISE_FADE[1], aw))
 
 
 def build_deck(coll):
