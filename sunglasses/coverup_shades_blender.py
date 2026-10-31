@@ -37,6 +37,11 @@ open channel.  The arm is a flat band whose outer face lies on the best-fit plan
 panel surface over that band, so it sits flush; only hairline seams show (its lower edge,
 and its front end against the hinge cap on the seam line).  Two filament pins register it.
 
+Top line: the brow deck's top slopes down from its rear edge to the crisp brow edge at Z_TOP
+(DECK_RISE, its own swept cutter).  Behind the hinge caps the side / arm top line starts
+HINGE_JOIN_H higher, level with the cap's rear top and with the same outer chamfer, and falls
+smoothly back onto the 6-deg base line over TOP_BUMP_LEN; the arm band below it is unchanged.
+
 Everything generated lives in the "CoverupShades_Gen" collection and is deleted and rebuilt
 on every run; reference image empties live in "CoverupShades_Refs" and are realigned.
 """
@@ -79,10 +84,18 @@ SIDE_TAPER_V2     = 0.58    # then a smooth shoulder down to v2 and a straight p
                             # bottom corner: about 0.8/1.9/3.9/10.4/12.5 mm at 12/25/30/43/47 mm
 
 # ---- brow deck ----
-DECK_T            = 3.5     # deck thickness
-DECK_DEPTH_C      = 8.5     # deck depth front-to-back at the centre
-DECK_DEPTH_TURN   = 7.0     # at the front-to-side turn (< CORNER_R)
-DECK_DEPTH_SEAM   = 10.0    # just behind the turn, under the rear of the hinge cap
+DECK_T            = 3.5     # deck thickness (measured under its sloped top)
+DECK_DEPTH_C      = 11.0    # deck depth front-to-back at the centre
+DECK_DEPTH_TURN   = 10.0    # where the front curve meets the turn (the inner edge rounds the
+                            # corner on a Hermite curve, so it is not limited by CORNER_R)
+DECK_CORNER_IN    = 5.0     # inner-edge rounding starts this far (w) before the turn ...
+DECK_CORNER_OUT   = 1.0     # ... and ends this far behind it
+DECK_CORNER_K     = 0.8     # Hermite tangent length / chord (fullness of the rounded corner)
+DECK_DEPTH_SEAM   = 9.3     # just behind the turn, under the rear of the hinge cap (a little
+                            # less than HINGE_WID, so the cap covers the deck where the top steps up)
+DECK_RISE         = 1.9     # the deck top rises from the crisp brow edge toward the face:
+                            # its rear edge sits this much higher (about 10 deg at the centre)
+DECK_RISE_FADE    = (14.0, 4.0)   # ... fading out between these distances (w) ahead of the cap
 DECK_DEPTH_SIDE   = 5.55    # along the side (arm channel + joggled wall + lip; >= 139 mm inside)
 DECK_DEPTH_REAR   = 3.6     # at the rear end (lip tapers out)
 DECK_SIDE_SLOPE   = 6.0     # deg, the deck / panel top slopes down toward the rear from the seam
@@ -100,7 +113,9 @@ NOTCH_FLARE_R     = 18.0    # concave flare radius into the bottom edge
 # ---- bottom edge ----
 BOTTOM_FLAT_X     = 44.0    # front bottom edge is flat out to |x| = this
 BOTTOM_RISE_TURN0 = 1.0     # rise of the bottom edge where the turn starts
-BOTTOM_RISE_TURN1 = 3.0     # rise at the end of the turn = side panel bottom level at the front
+BOTTOM_RISE_TURN1 = 2.0     # rise at the end of the turn = side panel bottom level at the front
+                            # (small, so in the side view the bottom outline runs on in one arc
+                            # instead of dipping at the turn and stepping up behind it)
 
 # ---- side panels ----
 PANEL_LENGTH      = 88.0    # from the brow-level turn end back to the panel (joggle) rear end
@@ -112,21 +127,32 @@ PANEL_MERGE_GAP   = 0.3     # visible panel strip left under the arm edge at the
 SEAM_OFFSET       = 1.5     # seam centre line behind the end of the turn
 SEAM_DEPTH        = 0.5
 SEAM_WIDTH        = 0.6
+SEAM_END_GAP      = 0.6     # the groove stops this far above the bottom edge (no notch in the
+SEAM_END_TAPER    = 2.0     # outline) and fades in over this length
 
 # ---- hinge caps (corner pieces) ----
 HINGE_LEN         = 10.0    # along the outer edge, forward from the seam (wraps the turn)
 HINGE_WID         = 9.5     # inward from the outer surface at the cap's rear (seam) end
 HINGE_INNER_LEN   = 4.0     # straight inner edge (parallel to the side) before the diagonal
 HINGE_FRONT_W     = 1.0     # width of the cap's small front face
-HINGE_H_REAR      = 3.0     # height above the deck at the rear (seam) end
-HINGE_H_FRONT     = 1.0     # ... sloping down to this at the front end
-HINGE_CHAMFER     = 2.5     # 45-deg chamfer on the outer top edge (rounds the front-view corner)
+HINGE_JOIN_H      = 2.5     # arm top (and panel top) at the joint, above the brow edge: the cap's
+                            # rear runs level into it and the top line then falls away rearward
+HINGE_H_REAR      = HINGE_JOIN_H + 0.05   # cap top at the rear (0.05 proud: no coplanar faces)
+HINGE_H_FRONT     = 1.0     # cap top at the front end, rising (along the cap, fractions from its
+HINGE_H_PEAK      = 4.0     # front) to this peak round the screw hole: a 4 mm inner face over the
+HINGE_PEAK_FROM   = 0.4     # level deck (most of the rise by here, the last HINGE_PEAK_CLIMB of
+HINGE_PEAK_CLIMB  = 0.18    # it climbed gently past the hole up to HINGE_PEAK_TO) ...
+HINGE_PEAK_TO     = 0.75    # ... then rounding down to HINGE_H_REAR at the rear face, with zero
+                            # slope there, so it runs tangentially into the arm's top edge
+HINGE_CHAMFER     = 2.5     # 45-deg chamfer on the outer top edge at the front (rounds the corner)
+HINGE_CHAMFER_REAR = 1.4    # ... narrowing to this at the rear = the arm's top-edge chamfer
+TOP_BUMP_LEN      = 57.0    # the raised top line at the joint falls back onto the 6-deg line over this
 HINGE_DROP        = 9.0     # the cap's outer face runs this far down the corner (outlined)
 HINGE_EMBED       = 1.0     # how far the raised part is sunk into the deck
 HINGE_SEAM_GAP    = 0.1     # cap rear face sits this far in front of the channel front wall
-HINGE_HOLE_D      = 2.0
+HINGE_HOLE_D      = 3.0
 HINGE_HOLE_DEPTH  = 2.5
-HINGE_HOLE_BACK   = 3.0     # hole centre this far in front of the cap rear face
+HINGE_HOLE_BACK   = 4.0     # hole centre this far in front of the cap rear face (on the peak)
 CAP_GROOVE_W      = 0.5     # outline groove of the cap on the corner surface
 CAP_GROOVE_D      = 0.4
 
@@ -146,7 +172,10 @@ PIN_EDGE_MARGIN   = 3.0
 ARM_T             = 3.0     # plate thickness behind the panel
 ARM_INLAY_T       = 2.0     # plate thickness inside the channel (keeps head clearance; the step is
                             # on the hidden inner face, at the panel rear end, so it prints flat)
-ARM_H0            = 13.0    # height over the inlay (constant to the panel rear end)
+ARM_H0            = 13.0    # height over the inlay (constant to the panel rear end; the front end is
+                            # HINGE_JOIN_H taller where the top line rises into the hinge cap)
+ARM_TOP_CHAMFER   = HINGE_CHAMFER_REAR   # 45-deg chamfer on the arm's outer top edge at the joint
+ARM_CHAMFER_LEN   = 25.0    # ... fading out over this length (on the bed side: prints flat)
 ARM_H1            = 9.0     # height from the end of the taper to the tip
 ARM_LENGTH        = 145.0   # hinge screw to tip, along the centre line (user's own pair)
 ARM_TAPER_LEN     = 65.0    # H0 -> H1 taper length from the panel rear end: ends near the tip, so the
@@ -329,8 +358,14 @@ Y_REAR = FRONT_SAG + PANEL_LENGTH                        # rear end of the panel
 Y_MERGE = Y_REAR - PANEL_MERGE_BACK                      # S-curve meets the arm's lower edge
 
 
-def z_topline(y):
-    """Brow deck / panel / arm top height as a function of world y."""
+Y_CAP_REAR = FRONT_SAG + SEAM_OFFSET - SEAM_WIDTH / 2 + 0.05 - HINGE_SEAM_GAP   # cap rear face
+Y_JOIN = Y_CAP_REAR - 0.25        # the raised side top line starts here (hidden under the cap)
+JOIN_H = HINGE_JOIN_H if has('e') else 0.0
+
+
+def z_baseline(y):
+    """Base top line (world y): flat at Z_TOP to the seam, then a smooth 6-deg fall.  The arm
+    band (lower edge, channel step, pins) hangs from this line at constant height."""
     y = np.asarray(y, float)
     d = y - Y_SLOPE0
     L = DECK_SLOPE_BLEND
@@ -339,11 +374,32 @@ def z_topline(y):
                              Z_TOP - TAN_DS * (d - L / 2)))
 
 
-def dz_topline(y):
+def dz_baseline(y):
     y = np.asarray(y, float)
     d = y - Y_SLOPE0
     L = DECK_SLOPE_BLEND
     return np.where(d <= 0, 0.0, np.where(d <= L, -TAN_DS * d / L, -TAN_DS))
+
+
+def top_bump(y):
+    """Extra height of the side top line behind the hinge cap: JOIN_H at the joint (level,
+    so the cap top runs straight into the arm top) falling smoothly back to 0."""
+    y = np.asarray(y, float)
+    t = np.clip((y - Y_JOIN) / TOP_BUMP_LEN, 0.0, 1.0)
+    return np.where(y < Y_JOIN - 0.05, 0.0, JOIN_H * (1.0 - t * t * (3 - 2 * t)))
+
+
+def z_topline(y):
+    """Panel / lip / arm top height behind the brow (world y).  In front of Y_JOIN the brow
+    deck is shaped by its own sloped cutter; this line is only the side and arm top there."""
+    return z_baseline(y) + top_bump(y)
+
+
+def z_topline_build(y):
+    """Height the shell / deck / joggle are built up to (then trimmed): covers the step
+    at Y_JOIN from both sides."""
+    y = np.asarray(y, float)
+    return np.maximum(z_topline(y), z_topline(y + 0.6))
 
 
 def y_seam(z):
@@ -361,9 +417,9 @@ def y_arm_front(z):
 
 
 def arm_bottom_z(y):
-    """World z of the arm's lower edge over the inlay (constant height ARM_H0)."""
-    ang = np.arctan(-dz_topline(y))
-    return z_topline(y) - ARM_H0 / np.cos(ang)
+    """World z of the arm's lower edge over the inlay (ARM_H0 below the base top line)."""
+    ang = np.arctan(-dz_baseline(y))
+    return z_baseline(y) - ARM_H0 / np.cos(ang)
 
 
 def band_bottom(y):
@@ -872,14 +928,14 @@ def outline_right():
     # -- 4: side panel bottom edge (side view), then its rear end at the merge point --
     side = side_bottom_curve()
     z_m = float(side[-1, 1])
-    ztop_m = float(z_topline(Y_MERGE)) + TOPM
+    ztop_m = float(z_topline_build(Y_MERGE)) + TOPM
     zz = np.linspace(z_m, ztop_m, max(2, int((ztop_m - z_m) / 0.6) + 1))
     rear = np.stack([np.full_like(zz, Y_MERGE), zz], -1)
     # -- 5: top of the side panel (forward), then across the front --
     zt_front = Z_TOP + TOPM
     y_ct = float(y_corner(zt_front)[0])
     yy = np.linspace(Y_MERGE, y_ct, max(2, int((Y_MERGE - y_ct) / 0.8) + 1))
-    top_side = np.stack([yy, z_topline(yy) + TOPM], -1)
+    top_side = np.stack([yy, z_topline_build(yy) + TOPM], -1)
     sv = dedup(np.vstack([side, rear[1:], top_side[1:]]))
     ws = w_from_side(sv[:, 0], sv[:, 1])
     segs.append(np.stack([ws, sv[:, 1]], -1))
@@ -951,8 +1007,8 @@ def joint_pin_positions():
     ys = [float(y_arm_front(Z_TOP)[0]) + JOINT_PIN_FRONT, Y_REAR - JOINT_PIN_REAR]
     res = []
     for y in ys:
-        ang = math.atan(-float(dz_topline(y)))
-        z = float(z_topline(y)) - 0.5 * ARM_H0 / math.cos(ang)
+        ang = math.atan(-float(dz_baseline(y)))
+        z = float(z_baseline(y)) - 0.5 * ARM_H0 / math.cos(ang)
         res.append((y, z))
     return res
 
@@ -1035,7 +1091,7 @@ def deck_depth(aw):
     aw = np.asarray(aw, float)
     w_end = WC0 + PANEL_LENGTH
     d = DECK_DEPTH_C + (DECK_DEPTH_TURN - DECK_DEPTH_C) * smoothstep(38.0, XC_REF - 2.0, aw)
-    # widen quickly once the turn has ended (offset depth must stay < CORNER_R in the turn)
+    # (round the turn the inner edge is a Hermite corner, see deck_inner)
     d = d + (DECK_DEPTH_SEAM - DECK_DEPTH_TURN) * smoothstep(WC0, WC0 + 0.8, aw)
     # ... and narrow straight after the hinge cap, so the temples keep their head clearance
     d = d + (DECK_DEPTH_SIDE - DECK_DEPTH_SEAM) * smoothstep(W_SEAM - 0.3, W_SEAM + 1.5, aw)
@@ -1044,38 +1100,81 @@ def deck_depth(aw):
     return d
 
 
-def _top_z_for_w(ws):
-    zt = np.full_like(ws, Z_TOP)
+def _top_z_for_w(ws, fn=None):
+    fn = z_baseline if fn is None else fn
+    zt = np.full_like(np.asarray(ws, float), Z_TOP)
     for _ in range(4):
         P = surf_P(ws, zt)
-        zt = z_topline(P[:, 1])
+        zt = fn(P[:, 1])
     return zt
+
+
+def _edge_frame(ws, fn=None):
+    """Outer top-edge points and horizontal outward normals at stations ws."""
+    zt = _top_z_for_w(ws, fn)
+    P, N, _, _ = surf_PN(ws, zt)
+    nh = N.copy(); nh[:, 2] = 0.0
+    nh /= np.linalg.norm(nh, axis=1, keepdims=True)
+    return P, nh, zt
+
+
+def deck_inner(ws):
+    """Plan (x, y) of the deck's inner (rear) edge for stations ws: the outer edge offset
+    by deck_depth, except round the turn, where a Hermite curve joins the front and side
+    offsets (so the deck can be deeper than CORNER_R without the offset folding over)."""
+    ws = np.asarray(ws, float)
+    aw = np.abs(ws)
+    P, nh, _ = _edge_frame(aw)
+    q = P[:, :2] - deck_depth(aw)[:, None] * nh[:, :2]
+    wa, wb = XC_REF - DECK_CORNER_IN, WC0 + DECK_CORNER_OUT
+
+    def raw(w):
+        Pr, nr, _ = _edge_frame(w)
+        return Pr[:, :2] - deck_depth(w)[:, None] * nr[:, :2]
+    ea = raw(np.array([wa - 0.05, wa, wa + 0.05]))
+    eb = raw(np.array([wb - 0.05, wb, wb + 0.05]))
+    L = wb - wa
+    m = (aw > wa) & (aw < wb)
+    t = ((aw[m] - wa) / L)[:, None]
+    chord = float(np.linalg.norm(eb[1] - ea[1]))
+    ta = ea[2] - ea[0]; ta = ta / np.linalg.norm(ta) * chord * DECK_CORNER_K
+    tb = eb[2] - eb[0]; tb = tb / np.linalg.norm(tb) * chord * DECK_CORNER_K
+    q[m] = hermite(ea[1][None], eb[1][None], ta[None], tb[None], t)
+    q[:, 0] *= np.where(ws < 0, -1.0, 1.0)
+    return q
+
+
+def deck_rise(aw):
+    """Height of the deck top's rear edge above the brow edge: DECK_RISE over the front,
+    fading to 0 ahead of the hinge cap, so the cap's inner face stands its full height over a
+    level deck (and the side lips are level across)."""
+    w0, w1 = cap_range()
+    return DECK_RISE * (1.0 - smoothstep(w0 - DECK_RISE_FADE[0], w0 - DECK_RISE_FADE[1],
+                                         np.asarray(aw, float)))
 
 
 def build_deck(coll):
     y_end = (Y_REAR if has('g') else Y_MERGE) - DECK_REAR_INSET
-    w_end = float(w_from_side(y_end, float(z_topline(y_end)))[0])
+    w_end = float(w_from_side(y_end, float(z_baseline(y_end)))[0])
     n = int(2 * w_end / 0.3) + 1
     ws = np.linspace(-w_end, w_end, n)
-    zt = _top_z_for_w(ws)
-    Pt, Nt, _, _ = surf_PN(ws, zt)
-    Plo, Nlo, _, _ = surf_PN(ws, zt - DECK_T)
-    Phi, Nhi, _, _ = surf_PN(ws, zt + TOPM)
-    nh = Nt.copy(); nh[:, 2] = 0.0
-    nh /= np.linalg.norm(nh, axis=1, keepdims=True)
-    D = deck_depth(np.abs(ws))[:, None]
+    Pt, nh, zt = _edge_frame(ws)                       # base top line (no joint bump)
+    zbld = _top_z_for_w(ws, z_topline_build)
+    Phi, Nhi, _, _ = surf_PN(ws, zbld + TOPM)
+    q = deck_inner(ws)
+    Dh = np.linalg.norm(Pt[:, :2] - q, axis=1)
+    rise = deck_rise(np.abs(ws))
     # 45-deg wedge under the deck (hidden): from the deck's inner lower edge down to the
     # wall, so the upright print needs no support under the brow
     # (front and corners only: along the temples the lip is short and a wedge would eat into
     # the head clearance)
     fw = 1.0 - smoothstep(W_SEAM - 0.3, W_SEAM + 1.5, np.abs(ws))
-    z_w = zt - DECK_T - fw * (D[:, 0] - 0.5 * WALL)
+    z_w = zt + rise - DECK_T - fw * (Dh - 0.5 * WALL)
     Pw, Nw, _, _ = surf_PN(ws, z_w)
     v0 = Pw - 0.5 * WALL * Nw
     v1 = Phi - 0.5 * WALL * Nhi
-    base = Pt - D * nh
-    v2 = base + np.array([0, 0, TOPM])
-    v3 = base - np.array([0, 0, DECK_T])
+    v2 = np.column_stack([q, zbld + TOPM + rise])       # built tall, trimmed by the cutters
+    v3 = np.column_stack([q, zt + rise - DECK_T])       # constant thickness under the sloped top
     R = np.stack([v0, v1, v2, v3], axis=1)
     verts, faces = sweep_mesh(R)
     return make_obj("tmp_Deck", verts, faces, coll)
@@ -1093,10 +1192,37 @@ def _xz_prism(name, poly, coll, X=130.0):
 
 
 def build_top_cutter(coll):
-    yy = np.concatenate([[-80.0], np.linspace(Y_SLOPE0 - 1, Y_SLOPE0 + DECK_SLOPE_BLEND + 1, 40), [260.0]])
+    """Side / temple top line (prism across x).  In front of Y_JOIN it stands clear: the
+    brow deck there is trimmed by build_deck_top_cutter."""
+    ys = Y_JOIN - 0.05
+    yy = np.append(np.arange(Y_JOIN, Y_JOIN + TOP_BUMP_LEN + DECK_SLOPE_BLEND + 2.0, 0.5), 260.0)
     top = np.stack([yy, z_topline(yy)], -1)
-    poly = np.vstack([top, [[260.0, 120.0], [-80.0, 120.0]]])
+    hi = Z_TOP + 8.0
+    poly = np.vstack([[[-80.0, hi], [ys, hi], [ys, float(z_topline(ys))]], top,
+                      [[260.0, 120.0], [-80.0, 120.0]]])
     return _xz_prism("tmp_TopCut", poly, coll)
+
+
+def build_deck_top_cutter(coll):
+    """Brow deck top: along every station the cut runs straight from the crisp outer edge
+    (at Z_TOP) up to the deck's rear edge (deck_rise higher), extended 2 mm past both, so the
+    deck slopes down toward the front.  Ends at Y_JOIN on the sides (under the hinge cap)."""
+    w_e = WC0 + (Y_JOIN - float(y_corner(Z_TOP)[0]))
+    ws = np.linspace(-w_e, w_e, int(2 * w_e / 0.3) + 1)
+    P, nh, _ = _edge_frame(ws)
+    q = deck_inner(ws)
+    d = P[:, :2] - q
+    Dh = np.linalg.norm(d, axis=1)
+    u = np.column_stack([d / Dh[:, None], np.zeros(len(ws))])      # horizontal, outward
+    rise = deck_rise(np.abs(ws))
+    s = (rise / Dh)[:, None]
+    up = np.array([0.0, 0.0, 1.0])
+    q3 = np.column_stack([q, np.full(len(ws), Z_TOP) + rise])
+    a = P + 2.0 * u - 2.0 * s * up
+    b = q3 - 2.0 * u + 2.0 * s * up
+    st = np.stack([a, b, b + (Z_TOP + 9.0 - b[:, 2:3]) * up, a + (Z_TOP + 9.0 - a[:, 2:3]) * up], 1)
+    verts, faces = sweep_mesh(st)
+    return make_obj("tmp_DeckTopCut", verts, faces, coll)
 
 
 def build_bottom_cutter(coll):
@@ -1139,7 +1265,7 @@ def build_joggle_slab(coll, sign):
     y_a = Y_MERGE - 3.0
     z_a = float(np.interp(y_a, ys, z_lo))
     z_lo = np.where(ys > y_a, np.maximum(z_lo, z_a + 1.1 * (ys - y_a)), z_lo)
-    z_hi = z_topline(ys) + TOPM + 1.0
+    z_hi = z_topline_build(ys) + TOPM + 1.0
     tap = 1.0 - (1.0 - JOGGLE_TAPER) * smoothstep(Y_REAR - 8.0, Y_REAR, ys)
     t_in = -(ARM_INLAY_T + ARM_LAP_GAP + JOGGLE_WALL * tap)
     t_out = np.full_like(ys, -1.0)
@@ -1202,9 +1328,34 @@ def cap_range():
     return w1 - HINGE_LEN, w1
 
 
-def cap_height(w):
+def cap_profile(w):
+    """Cap top height above Z_TOP and outer chamfer along the cap: rising from the front to
+    the HINGE_H_PEAK bump round the screw hole, then rounding down (zero end slope) to the
+    rear face, where top and chamfer match the arm's top edge (HINGE_JOIN_H, ARM_TOP_CHAMFER)
+    so the two run on with no step."""
     w0, w1 = cap_range()
-    return HINGE_H_FRONT + (HINGE_H_REAR - HINGE_H_FRONT) * np.clip((w - w0) / (w1 - w0), 0, 1)
+    f = np.clip((np.asarray(w, float) - w0) / (w1 - w0), 0, 1)
+    # quick rise at the front, then a gentle (~7 deg) climb past the hole to the peak, so the
+    # top faces forward a little (as in the photos), then the rounded fall to joint level
+    g = ((1.0 - HINGE_PEAK_CLIMB) * smoothstep(0.0, HINGE_PEAK_FROM, f)
+         + HINGE_PEAK_CLIMB * smoothstep(HINGE_PEAK_FROM - 0.1, HINGE_PEAK_TO, f))
+    h = (HINGE_H_FRONT + (HINGE_H_PEAK - HINGE_H_FRONT) * g
+         - (HINGE_H_PEAK - HINGE_H_REAR) * smoothstep(HINGE_PEAK_TO, 1.0, f))
+    ch = HINGE_CHAMFER + (HINGE_CHAMFER_REAR - HINGE_CHAMFER) * smoothstep(HINGE_PEAK_TO, 1.0, f)
+    return h, ch
+
+
+def cap_inner_height(w):
+    """Cap top at its inner edge (level across the cap)."""
+    return cap_profile(w)[0]
+
+
+def cap_height(w):
+    return cap_profile(w)[0]
+
+
+def cap_chamfer(ws, h, width):
+    return np.maximum(0.05, np.minimum.reduce([cap_profile(ws)[1], h - 0.05, width - 0.5]))
 
 
 def cap_frame(ws):
@@ -1237,29 +1388,36 @@ def hinge_hole_centre(sign=1):
     w0, w1 = cap_range()
     i = int(np.argmin(np.abs(ws - (w1 - HINGE_HOLE_BACK))))
     h = float(cap_height(ws[i:i + 1])[0])
+    hi = float(cap_inner_height(ws[i:i + 1])[0])
     width = float(np.linalg.norm(P0[i, :2] - inner[i]))
-    ch = min(HINGE_CHAMFER, h - 0.05, width - 0.5)
+    ch = float(cap_chamfer(ws[i:i + 1], np.array([h]), np.array([width]))[0])
     o = P0[i, :2] - ch * nh[i, :2]
     c = np.array([0.5 * (o[0] + inner[i, 0]), 0.5 * (o[1] + inner[i, 1]), Z_TOP])
     if sign < 0:
         c = c * np.array([-1.0, 1, 1])
-    return c, h
+    return c, 0.5 * (h + hi)                 # top height at the hole centre (above Z_TOP)
 
 
 def build_hinge_caps(coll):
-    """Corner caps: a raised top (HINGE_H_FRONT..HINGE_H_REAR, chamfered outer edge) over
-    the turn, ending at the seam where the arm butts against it."""
+    """Corner caps over the turn, ending at the seam where the arm butts against them: a
+    chamfered top rising from HINGE_H_FRONT to HINGE_H_PEAK round the screw hole (a 4 mm
+    inner face over the level deck), then rounding down to the arm's top-edge height and
+    chamfer at the rear face.  The outer face follows the surface above the brow edge (0.02
+    proud), so it is flush with the arm's outer face."""
     ws, P0, nh, inner = cap_stations()
     Pe, Ne, _, _ = surf_PN(ws, np.full_like(ws, Z_TOP - HINGE_EMBED))
     h = cap_height(ws)
+    hi = cap_inner_height(ws)
     width = np.linalg.norm(P0[:, :2] - inner, axis=1)
-    ch = np.maximum(0.05, np.minimum.reduce([np.full_like(h, HINGE_CHAMFER), h - 0.05, width - 0.5]))
+    ch = cap_chamfer(ws, h, width)
     up = np.array([0, 0, 1.0])
+    Pu, Nu, _, _ = surf_PN(ws, Z_TOP + h - ch)
+    Pc, _, _, _ = surf_PN(ws, Z_TOP + h)
     inner3 = np.column_stack([inner, np.full(len(inner), Z_TOP)])
     st = np.stack([Pe - 0.05 * Ne,
-                   P0 + (h - ch)[:, None] * up,
-                   P0 - ch[:, None] * nh + h[:, None] * up,
-                   inner3 + h[:, None] * up,
+                   Pu + 0.02 * Nu,
+                   Pc - ch[:, None] * nh,
+                   inner3 + hi[:, None] * up,
                    inner3 - HINGE_EMBED * up], 1)
     caps, holes = [], []
     for sign in (1, -1):
@@ -1270,19 +1428,22 @@ def build_hinge_caps(coll):
         circ = np.stack([c[0] + r * np.cos(a), c[1] + r * np.sin(a)], -1)
         dv, tris = triangulate_domain(circ, [])
         za = Z_TOP + hh - min(HINGE_HOLE_DEPTH, hh + 0.5)
-        zb = Z_TOP + hh + 1.0
+        zb = Z_TOP + HINGE_H_PEAK + 1.0
         verts, faces = prism_mesh(tris, np.column_stack([dv, np.full(len(dv), zb)]),
                                   np.column_stack([dv, np.full(len(dv), za)]))
         holes.append(make_obj("tmp_CapHole%+d" % sign, verts, faces, coll))
     return caps, holes
 
 
-def _surface_groove_along_z(name, wc, width, depth, z0, z1, coll, sign):
+def _surface_groove_along_z(name, wc, width, depth, z0, z1, coll, sign, taper=0.0):
+    """Groove of constant width along z; with taper > 0 its depth fades in from 10 % at z0
+    over that length (a closed lower end that leaves the edge outline untouched)."""
     stations = []
-    for z in np.arange(z0, z1 + 1e-9, 0.5):
+    for z in np.arange(z0, z1 + 1e-9, 0.25 if taper > 0 else 0.5):
         ws = wc + np.array([-width / 2, width / 2])
         P, N, _, _ = surf_PN(ws, np.full(2, z))
-        stations.append([P[0] - depth * N[0], P[1] - depth * N[1], P[1] + 1.0 * N[1], P[0] + 1.0 * N[0]])
+        d = depth * (0.1 + 0.9 * float(smoothstep(z0, z0 + taper, z))) if taper > 0 else depth
+        stations.append([P[0] - d * N[0], P[1] - d * N[1], P[1] + 1.0 * N[1], P[0] + 1.0 * N[0]])
     return sweep_obj(name, stations, coll, sign)
 
 
@@ -1303,8 +1464,11 @@ def build_seam_cutters(coll):
     w0, w1 = cap_range()
     for sign in (1, -1):
         z_top = float(band_bottom(float(y_seam(Z_TOP - ARM_H0)[0]))) + 0.3 if has('g') else Z_TOP + 2.0
+        # stops just above the side bottom edge (cutting through it left a notch in the
+        # side-view outline)
         obs.append(_surface_groove_along_z("tmp_Seam%+d" % sign, W_SEAM, SEAM_WIDTH, SEAM_DEPTH,
-                                           Z_BOT - 3.0, z_top, coll, sign))
+                                           side_zlow() + SEAM_END_GAP, z_top, coll, sign,
+                                           taper=SEAM_END_TAPER))
         obs.append(_surface_groove_along_w("tmp_CapLow%+d" % sign, zg, CAP_GROOVE_W, CAP_GROOVE_D,
                                            w0 - CAP_GROOVE_W / 2, W_SEAM, coll, sign))
         obs.append(_surface_groove_along_z("tmp_CapFront%+d" % sign, w0, CAP_GROOVE_W, CAP_GROOVE_D,
@@ -1359,24 +1523,26 @@ def arm_curves(y_b0, bend):
     y_start = Y_SEAM_TOP - 6.0
     yy = np.arange(y_start, y_b0, 0.5)
     yy = np.append(yy, y_b0)
-    te1 = np.stack([yy, z_topline(yy)], -1)
-    psi1 = np.arctan(dz_topline(yy))
+    te1 = np.stack([yy, z_baseline(yy)], -1)
+    psi1 = np.arctan(dz_baseline(yy))
     te2 = te1[-1] + np.stack([bx, bz], -1)
-    te = np.vstack([te1, te2[1:]])
+    teb = np.vstack([te1, te2[1:]])                  # base top edge (the band hangs from it)
     psi = np.concatenate([psi1, psi_b[1:]])
-    seg = np.linalg.norm(np.diff(te, axis=0), axis=1)
+    seg = np.linalg.norm(np.diff(teb, axis=0), axis=1)
     s = np.concatenate([[0], np.cumsum(seg)])
     s_rear = float(np.interp(Y_REAR, te1[:, 0], s[:len(te1)])) if y_b0 > Y_REAR else s[len(te1) - 1]
     # linear taper with rounded ends, about as fast as the top edge falls, so the lower edge
     # runs on nearly level behind the panel (as in the photo) instead of rising in a wave
     h = ARM_H0 + (ARM_H1 - ARM_H0) * soft_ramp(s, s_rear, s_rear + ARM_TAPER_LEN, 8.0)
     nup = np.stack([-np.sin(psi), np.cos(psi)], -1)
-    be = te - h[:, None] * nup
-    return te, be, psi, h, nup, th, Lb, len(te1) - 1
+    be = teb - h[:, None] * nup
+    te = teb.copy()
+    te[:len(te1), 1] += top_bump(yy)                 # the top edge rises into the hinge cap
+    return te, be, psi, h, nup, th, Lb, len(te1) - 1, teb
 
 
 def arm_outline_and_length(y_b0, bend):
-    te, be, psi, h, nup, th, Lb, ib = arm_curves(y_b0, bend)
+    te, be, psi, h, nup, th, Lb, ib, teb = arm_curves(y_b0, bend)
     t_end = np.array([math.cos(psi[-1]), math.sin(psi[-1])])
     c = te[-1] - 0.5 * h[-1] * nup[-1]
     beta = np.linspace(math.pi, 0.0, 33)
@@ -1394,7 +1560,7 @@ def arm_outline_and_length(y_b0, bend):
     poly = dedup(poly, 1e-6)
     if poly_area(poly) < 0:
         poly = poly[::-1]
-    cl = te - 0.5 * h[:, None] * nup
+    cl = teb - 0.5 * h[:, None] * nup                   # centre line of the ARM_H0 band
     clk = cl[cl @ nrm >= cfront]
     hinge_c, _ = hinge_hole_centre(1)
     L = (clk[0, 0] - hinge_c[1]) + np.sum(np.linalg.norm(np.diff(clk, axis=0), axis=1)) + 0.5 * h[-1]
@@ -1429,6 +1595,24 @@ def arm_outline():
     return poly, info
 
 
+def build_arm_chamfer_cutter(coll, sign=1, lens=False):
+    """45-deg chamfer on the arm's outer top edge: ARM_TOP_CHAMFER at the joint (the same
+    profile as the hinge cap's rear end), fading out over ARM_CHAMFER_LEN.  Sections are in
+    planes of constant y, in the arm plane's (t, z) frame.  lens=True: the short constant
+    piece that trims the lens's channel front wall (between cap and arm) to the same profile."""
+    y_af = float(y_arm_front(Z_TOP + JOIN_H)[0])
+    if lens:
+        ys = np.linspace(Y_JOIN - 0.2, y_af - 0.1, 6)
+    else:
+        ys = np.arange(max(y_af - 1.5, Y_JOIN + 0.1), y_af + ARM_CHAMFER_LEN + 0.5, 0.25)
+    c = (ARM_TOP_CHAMFER + 0.2) * (1.0 - smoothstep(y_af + 1.0, y_af + ARM_CHAMFER_LEN, ys)) - 0.2
+    zt = z_topline(ys)
+    st = np.stack([plane_pt(ys, zt - c - 0.8, 0.8),
+                   plane_pt(ys, zt + 0.8, -c - 0.8),
+                   plane_pt(ys, zt + 0.8, 0.8)], 1)
+    return sweep_obj("tmp_ArmChamfer%+d%s" % (sign, "L" if lens else ""), st, coll, sign)
+
+
 def build_arms(coll):
     poly, info = arm_outline()
     poly = densify(poly, 1.0, closed=True)
@@ -1452,6 +1636,11 @@ def build_arms(coll):
         thick = make_obj("tmp_ArmThick", v2, f2, coll)
         bool_apply(arm_r, thick, 'UNION')
         me = thick.data; bpy.data.objects.remove(thick, do_unlink=True); bpy.data.meshes.remove(me)
+    if has('e') and ARM_TOP_CHAMFER > 0:
+        cut = build_arm_chamfer_cutter(coll)
+        bool_apply(arm_r, cut, 'DIFFERENCE')
+        me = cut.data; bpy.data.objects.remove(cut, do_unlink=True); bpy.data.meshes.remove(me)
+    if ARM_T > ARM_INLAY_T or (has('e') and ARM_TOP_CHAMFER > 0):
         finalize_triangles(arm_r)
         verts = np.array([v.co[:] for v in arm_r.data.vertices])
         faces = [tuple(p.vertices) for p in arm_r.data.polygons]
@@ -1737,6 +1926,7 @@ def build():
             apply(build_joggle_slab(coll, sign), 'UNION')
     if has('b'):
         apply(build_top_cutter(coll), 'DIFFERENCE')
+        apply(build_deck_top_cutter(coll), 'DIFFERENCE')
         if BROW_FACET_H > 0:
             apply(build_brow_facet_cutter(coll), 'DIFFERENCE')
     if has('c'):
@@ -1747,6 +1937,9 @@ def build():
         for sign in (1, -1):
             apply(build_channel_cutter(coll, sign), 'DIFFERENCE')
     if has('e'):
+        if ARM_TOP_CHAMFER > 0:
+            for sign in (1, -1):
+                apply(build_arm_chamfer_cutter(coll, sign, lens=True), 'DIFFERENCE')
         caps, holes = build_hinge_caps(coll)
         for c in caps:
             apply(c, 'UNION')
