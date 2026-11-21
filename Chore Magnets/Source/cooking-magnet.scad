@@ -39,8 +39,17 @@ difference() {polygon(points=[[-0.14281,-0.03687],[-0.13969,-0.03687],[-0.13672,
 } }
 
 module detail() {
- translate([0,3.5,tile_thickness-eps]) linear_extrude(height=relief_height+eps)
-  scale(21.5) offset(delta=0.001) icon_cooking();
+ // A narrow background-colour gap separates the spatula from the pan rim.
+ difference() {
+  translate([0,3.5,tile_thickness-eps]) linear_extrude(height=relief_height+eps)
+   scale(21.5) offset(delta=0.001) icon_cooking();
+  translate([0,0,tile_thickness-2*eps]) linear_extrude(height=relief_height+4*eps)
+   for (segment = [0:3]) hull() {
+    points = [[-5.17,3.36],[-5.41,3.09],[-5.55,2.80],[-5.57,2.51],[-5.49,2.21]];
+    translate(points[segment]) circle(d=0.32, $fn=20);
+    translate(points[segment+1]) circle(d=0.32, $fn=20);
+   }
+ }
  translate([0,-0.39*tile_size,tile_thickness-eps]) linear_extrude(height=letter_height+eps)
   text("COOKING",size=3.5/1.028,font=font_name,halign="center",valign="baseline",$fn=24);
 }
