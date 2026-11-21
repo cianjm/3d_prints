@@ -3,7 +3,7 @@ from pathlib import Path
 from collections import defaultdict
 import math
 base=Path(__file__).resolve().parent.parent
-items={'groceries':('groceries-30-percent-thinner-concept.png',(165,7,1090,1218))}
+items={'groceries':('groceries-simple-reference.png',(160,67,639,733))}
 def inside(pt,poly):
  x,y=pt; hit=False
  for i,(x1,y1) in enumerate(poly):
@@ -49,7 +49,9 @@ def trace(name, item):
  for item in loops:
   if item['area']<=0:continue
   holes=[x for x in loops if x['parent'] is item and x['area']<0]
-  pieces.append('difference() {'+poly(item['p'])+' union() {'+''.join(poly(x['p']) for x in holes)+'}}')
+  # Move only the bottle and bread slightly toward the middle item.
+  shift = -0.015 if min(x for x,y in item['p']) > w/2 else 0.015 if max(x for x,y in item['p']) < w/2 else 0
+  pieces.append(('translate([%.5f,0]) '%shift if shift else '')+'difference() {'+poly(item['p'])+' union() {'+''.join(poly(x['p']) for x in holes)+'}}')
  print(name,w,h,'components',len(pieces))
  return 'module icon_'+name+'() { union() {\n'+'\n'.join(pieces)+'\n} }\n'
 modules=''.join(trace(k,v) for k,v in items.items())
