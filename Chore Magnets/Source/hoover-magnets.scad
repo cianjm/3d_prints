@@ -1,6 +1,6 @@
 // Colours: 20 mm attic green/white; 25 mm upstairs and downstairs blue/white.
 // Hoover chore magnet: print flat with the icon facing up.
-// Dimensions are in mm. The back recess is intended for a 6 x 2 mm disc magnet; test the fit.
+// Dimensions in mm. Attic uses two small magnets; blue tiles use one 10 x 2 mm magnet.
 
 /* [Tile] */
 tile_size = 25;          // Size of upstairs and downstairs tiles
@@ -17,7 +17,8 @@ label_font = "Arial:style=Bold"; // Requires Arial installed for regenerating th
 label_size = 3.6;
 
 /* [Magnet] */
-magnet_diameter = 6;    // Actual nominal disc diameter
+magnet_diameter = 6;    // Nominal attic magnet diameter; set to 5 for its 5 mm version
+blue_magnet_diameter = 10; // Nominal disc diameter for the blue tiles
 magnet_thickness = 2;    // Actual nominal disc thickness
 pocket_diameter_clearance = 0.05; // Total diameter clearance; test the fit
 pocket_depth_clearance = 0.1;    // Extra depth to keep magnet below the back
@@ -26,7 +27,7 @@ pocket_depth_clearance = 0.1;    // Extra depth to keep magnet below the back
 eps = 0.02;
 effective_tile_size = chore == "Hoover attic" ? small_tile_size : tile_size;
 front_scale = effective_tile_size / 36;
-pocket_diameter = magnet_diameter + pocket_diameter_clearance;
+pocket_diameter = (chore == "Hoover attic" ? magnet_diameter : blue_magnet_diameter) + pocket_diameter_clearance;
 pocket_depth = magnet_thickness + pocket_depth_clearance;
 notch_width = 1.6; // Screwdriver slot width
 notch_extension = 1.2; // Distance beyond the round pocket
@@ -41,7 +42,8 @@ assert(corner_radius >= 0 && corner_radius < effective_tile_size/2, "Corner radi
 assert(icon_size > 0 && icon_size <= 34, "Icon must fit inside the tile with a margin.");
 assert(magnet_diameter > 0 && magnet_thickness > 0 && pocket_diameter_clearance >= 0 && pocket_depth_clearance >= 0, "Magnet dimensions must be positive and clearances nonnegative.");
 assert(pocket_diameter < effective_tile_size - 2*corner_radius, "Magnet pocket is too wide for the tile.");
-assert(pocket_spacing/2 + pocket_diameter/2 < effective_tile_size/2 - corner_radius, "Two magnet pockets must stay inside the tile.");
+assert(chore != "Hoover attic" || pocket_spacing/2 + pocket_diameter/2 < effective_tile_size/2 - corner_radius, "Two magnet pockets must stay inside the tile.");
+assert(chore == "Hoover attic" || pocket_diameter/2 + notch_extension < effective_tile_size/2 - corner_radius, "The single pocket and notch must fit inside the tile.");
 assert(pocket_depth <= tile_thickness - 0.8, "Increase tile thickness to leave at least 0.8 mm above the magnet pocket.");
 
 // The slot joins the circular pocket while preserving most of its rim.
@@ -54,7 +56,7 @@ module magnet_pocket(x) {
     }
 }
 assert(notch_width>0 && notch_extension>0, "The screwdriver notch must have positive dimensions.");
-assert(pocket_spacing - pocket_diameter - 2*notch_extension > 0.6, "Leave at least 0.6 mm between the two slots.");
+assert(chore != "Hoover attic" || pocket_spacing - pocket_diameter - 2*notch_extension > 0.6, "Leave at least 0.6 mm between the two slots.");
 
 module rounded_square(size, radius) {
     if (radius == 0) square([size, size], center=true);
@@ -133,7 +135,7 @@ assert(chore == "Hoover attic" || chore == "Hoover downstairs" || chore == "Hoov
 union() {
     difference() {
         linear_extrude(height=tile_thickness) rounded_square(effective_tile_size, corner_radius);
-        for (x = [-pocket_spacing/2, pocket_spacing/2])
+        for (x = chore == "Hoover attic" ? [-pocket_spacing/2, pocket_spacing/2] : [0])
             magnet_pocket(x);
     }
     scale([front_scale,front_scale,1]) {

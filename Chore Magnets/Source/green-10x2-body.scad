@@ -1,4 +1,4 @@
-// 20 mm green chore-tile body for one removable 10 x 2 mm disc magnet.
+// Configurable chore-tile body for one removable 10 x 2 mm disc magnet.
 // The 0.05 mm diametral and 0.1 mm depth clearances reuse the 6 mm fit
 // as a starting point; the 10 mm magnet fit has not yet been tested.
 tile_size = 20;
