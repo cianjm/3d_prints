@@ -18,6 +18,8 @@ label_size = 3.6;
 
 /* [Magnet] */
 magnet_diameter = 6;    // Nominal attic magnet diameter; set to 5 for its 5 mm version
+blue_triangle_5 = false; // Set true for three 5 x 2 mm magnets in blue tiles
+blue_triangle_offset = 8;
 blue_magnet_diameter = 10; // Nominal disc diameter for the blue tiles
 magnet_thickness = 2;    // Actual nominal disc thickness
 pocket_diameter_clearance = 0.05; // Total diameter clearance; test the fit
@@ -27,7 +29,7 @@ pocket_depth_clearance = 0.1;    // Extra depth to keep magnet below the back
 eps = 0.02;
 effective_tile_size = chore == "Hoover attic" ? small_tile_size : tile_size;
 front_scale = effective_tile_size / 36;
-pocket_diameter = (chore == "Hoover attic" ? magnet_diameter : blue_magnet_diameter) + pocket_diameter_clearance;
+pocket_diameter = (chore == "Hoover attic" ? magnet_diameter : blue_triangle_5 ? 5 : blue_magnet_diameter) + pocket_diameter_clearance;
 pocket_depth = magnet_thickness + pocket_depth_clearance;
 notch_width = 1.6; // Screwdriver slot width
 notch_extension = 1.2; // Distance beyond the round pocket
@@ -36,6 +38,7 @@ $fa = 4;
 $fs = 0.35;
 
 assert(tile_size >= 25 && small_tile_size >= 20, "Upstairs/downstairs tiles must be at least 25 mm and the attic at least 20 mm.");
+assert(chore == "Hoover attic" || !blue_triangle_5 || (blue_triangle_offset>pocket_diameter/2 && blue_triangle_offset+pocket_diameter/2 < tile_size/2-1), "Triangle pockets need more space from each other or the edge.");
 assert(label_height > 0 && label_size > 0 && label_size <= 3.6, "Use positive lettering height and a label size up to 3.6 mm.");
 assert(tile_size > 0 && tile_thickness > 0 && icon_height > 0, "Tile and icon dimensions must be positive.");
 assert(corner_radius >= 0 && corner_radius < effective_tile_size/2, "Corner radius must be less than half the tile size.");
@@ -135,8 +138,12 @@ assert(chore == "Hoover attic" || chore == "Hoover downstairs" || chore == "Hoov
 union() {
     difference() {
         linear_extrude(height=tile_thickness) rounded_square(effective_tile_size, corner_radius);
-        for (x = chore == "Hoover attic" ? [-pocket_spacing/2, pocket_spacing/2] : [0])
-            magnet_pocket(x);
+        if (chore != "Hoover attic" && blue_triangle_5)
+            for (pos = [[-blue_triangle_offset,blue_triangle_offset],[blue_triangle_offset,blue_triangle_offset],[0,-blue_triangle_offset]])
+                translate([0,pos[1],0]) magnet_pocket(pos[0]);
+        else
+            for (x = chore == "Hoover attic" ? [-pocket_spacing/2, pocket_spacing/2] : [0])
+                magnet_pocket(x);
     }
     scale([front_scale,front_scale,1]) {
         translate([-8,5.8,tile_thickness-eps])

@@ -5,6 +5,8 @@ tile_thickness=10;
 corner_radius=2;
 relief_height=0.8;
 letter_height=0.6;
+triangle_5=false; // Set true for three 5 x 2 mm magnets
+triangle_offset=8; // Pocket-centre offset from tile centre
 magnet_diameter=10; // One 10 x 2 mm magnet; test the pocket fit
 magnet_thickness=2;
 magnet_clearance=0.05; // Total diametral clearance
@@ -14,10 +16,11 @@ notch_extension=1.2;
 pocket_spacing=9.4;
 font_name="Arial:style=Bold";
 eps=0.02;
-pocket_d=magnet_diameter+magnet_clearance;
+pocket_d=(triangle_5 ? 5 : magnet_diameter)+magnet_clearance;
 pocket_depth=magnet_thickness+air_gap;
 $fa=4; $fs=0.35;
 assert(tile_size>2*corner_radius && corner_radius>0, "Check tile and corner dimensions.");
+assert(!triangle_5 || (triangle_offset>pocket_d/2 && triangle_offset+pocket_d/2 < tile_size/2-1), "Triangle pockets need more space from each other or the edge.");
 assert(magnet_diameter>0 && magnet_thickness>0 && magnet_clearance>=0 && air_gap>=0, "Check magnet dimensions.");
 assert(pocket_d/2+notch_extension < tile_size/2-corner_radius, "Magnet pocket or notch too close to the edge.");
 assert(pocket_depth < tile_thickness-0.8, "Pocket too deep.");
@@ -31,7 +34,8 @@ module magnet_pocket(x) {
 module base() {
  difference() {
   linear_extrude(height=tile_thickness) offset(r=corner_radius) square([tile_size-2*corner_radius,tile_size-2*corner_radius],center=true);
-  magnet_pocket(0);
+  for (pos=triangle_5 ? [[-triangle_offset,triangle_offset],[triangle_offset,triangle_offset],[0,-triangle_offset]] : [[0,0]])
+   translate([0,pos[1],0]) magnet_pocket(pos[0]);
  }
 }
 module icon_dusting() { union() {
