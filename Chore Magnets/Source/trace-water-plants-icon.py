@@ -53,4 +53,8 @@ def trace(name, item):
  print(name,w,h,'components',len(pieces))
  return 'module icon_'+name+'() { union() {\n'+'\n'.join(pieces)+'\n} }\n'
 modules=''.join(trace(k,v) for k,v in items.items())
+lines=modules.splitlines()
+assert len(lines)==14
+# Keep three separate droplets and widen them for a 0.2 mm nozzle.
+modules='\n'.join([lines[0],lines[1], 'offset(delta=0.010) '+lines[3], 'translate([-0.015,0]) offset(delta=0.010) '+lines[7], 'translate([0,0.020]) offset(delta=0.010) '+lines[10], lines[11],lines[12],lines[13]])+'\n'
 (base/'Source/water-plants-icon-contours.scad').write_text(modules)
